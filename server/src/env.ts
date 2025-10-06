@@ -47,10 +47,13 @@ function resolveFirebaseServiceAccount() {
   }
 }
 
+const CLIENT_ORIGINS = parseClientOrigins()
+
 export const ENV = {
   PORT: Number(process.env.PORT ?? 8080),
   MONGODB_URI: requireEnv('MONGODB_URI'),
-  CLIENT_ORIGINS: parseClientOrigins(),
+  CLIENT_ORIGIN: CLIENT_ORIGINS[0],
+  CLIENT_ORIGINS,
   FIREBASE_SERVICE_ACCOUNT_JSON: resolveFirebaseServiceAccount(),
   CF_ACCOUNT_ID: requireEnv('CF_ACCOUNT_ID'),
   CF_IMAGES_TOKEN: requireEnv('CF_IMAGES_TOKEN'),

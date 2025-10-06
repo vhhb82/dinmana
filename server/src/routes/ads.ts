@@ -1,5 +1,6 @@
-﻿import { Router } from 'express'
+import { Router } from 'express'
 import { z } from 'zod'
+import type { SortOrder } from 'mongoose'
 import { Ad } from '../models/Ad'
 
 export const ads = Router()
@@ -28,9 +29,10 @@ ads.get('/', async (req, res) => {
     }
   }
 
-  const order: Record<string, 1 | -1> =
+  const order: Record<string, SortOrder> =
     sort === 'price_asc' ? { price: 1 } : sort === 'price_desc' ? { price: -1 } : { createdAt: -1 }
-  const items = await Ad.find(filter).sort(order as any).limit(60)
+
+  const items = await Ad.find(filter).sort(order).limit(60)
   res.json(items)
 })
 

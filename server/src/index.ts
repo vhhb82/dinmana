@@ -14,7 +14,7 @@ import { Message } from './models/Message'
 async function main() {
   await connectDB()
 
-  const allowedOrigins = ENV.CLIENT_ORIGINS
+  const allowedOrigins = ENV.CLIENT_ORIGINS.length === 1 ? ENV.CLIENT_ORIGIN : ENV.CLIENT_ORIGINS
   const app = express()
   const httpServer = createServer(app)
   const io = new Server(httpServer, {

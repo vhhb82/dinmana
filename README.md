@@ -9,11 +9,11 @@ Aplicatie marketplace construita cu Next.js (frontend) si un backend Express + S
 - `server/.env` - variabile private pentru backend (nu le incarca in git).
 
 ## Rulare locala
-1. Instaleaza dependentele in ambele proiecte:
+1. Instaleaza dependentele (npm workspaces configureaza si backend-ul):
    ```bash
    npm install
-   cd server && npm install
    ```
+   Daca ai nevoie de comenzi doar pentru backend, le poti rula din `server/`.
 2. Configureaza variabilele (vezi sectiunea urmatoare) si ruleaza serviciile in paralel:
    ```bash
    # frontend
@@ -53,7 +53,7 @@ Vercel nu poate gazdui direct serverul Express + Socket.IO, deci publica `server
 1. Importa repository-ul in Vercel si lasa setarile implicite: build command `npm run build`, output directory `.`, root directory radacina proiectului.
 2. Adauga variabilele front-end mentionate (in special `NEXT_PUBLIC_API_BASE` setata la URL-ul backend-ului implementat la pasul anterior).
 3. Daca folosesti Cloudflare Images, seteaza si `NEXT_PUBLIC_FIREBASE_*` cu valorile corecte pentru mediul de productie.
-4. Deploy-ul automat va rula `npm install` si `npm run build`. In medii noi nu exista director `.next`, deci eroarea de blocare intalnita local nu apare.
+4. Deploy-ul automat va rula `npm install` si `npm run build`. Datorita configuratiei npm workspaces, dependentele backend-ului sunt instalate automat, astfel incat verificarea TypeScript trece si in mediu curat.
 5. Dupa primul deploy actualizeaza `CLIENT_ORIGIN` din backend pentru a include domeniul final Vercel (`https://<project>.vercel.app`) si orice custom domain pe care il atasezi.
 
 ### 3. Verificari recomandate
