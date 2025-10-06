@@ -1,0 +1,26 @@
+{
+  "name": "dinmana-server",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc -p ."
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "firebase-admin": "^12.6.0",
+    "mongoose": "^8.5.1",
+    "morgan": "^1.10.0",
+    "node-fetch": "^3.3.2",
+    "socket.io": "^4.7.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/morgan": "^1.9.10",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}
