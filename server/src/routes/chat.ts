@@ -1,5 +1,5 @@
 ﻿import { Router } from 'express'
-import { Message } from '../models/Message'
+import { Message } from '../models/Message.js'
 
 export const chat = Router()
 

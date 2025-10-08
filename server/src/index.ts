@@ -1,15 +1,15 @@
-import cors from 'cors'
+﻿import cors from 'cors'
 import express from 'express'
 import morgan from 'morgan'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
-import { ENV } from './env'
-import { connectDB } from './db'
-import { ads } from './routes/ads'
-import { upload } from './routes/upload'
-import { chat } from './routes/chat'
-import { verifyFirebaseToken } from './middleware/auth'
-import { Message } from './models/Message'
+import { ENV } from './env.js'
+import { connectDB } from './db.js'
+import { ads } from './routes/ads.js'
+import { upload } from './routes/upload.js'
+import { chat } from './routes/chat.js'
+import { verifyFirebaseToken } from './middleware/auth.js'
+import { Message } from './models/Message.js'
 
 async function main() {
   await connectDB()

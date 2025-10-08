@@ -1,6 +1,6 @@
-import { Router } from 'express'
+﻿import { Router } from 'express'
 import fetch from 'node-fetch'
-import { ENV } from '../env'
+import { ENV } from '../env.js'
 
 type DirectUploadResponse = {
   result?: { id: string; uploadURL: string }

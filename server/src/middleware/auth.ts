@@ -1,6 +1,6 @@
 ﻿import admin from 'firebase-admin'
 import type { Request, Response, NextFunction } from 'express'
-import { ENV } from '../env'
+import { ENV } from '../env.js'
 
 if (!admin.apps.length) {
   const credentials = JSON.parse(ENV.FIREBASE_SERVICE_ACCOUNT_JSON)

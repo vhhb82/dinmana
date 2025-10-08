@@ -1,7 +1,7 @@
-import { Router } from 'express'
+﻿import { Router } from 'express'
 import { z } from 'zod'
 import type { SortOrder } from 'mongoose'
-import { Ad } from '../models/Ad'
+import { Ad } from '../models/Ad.js'
 
 export const ads = Router()
 
