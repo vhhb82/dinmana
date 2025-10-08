@@ -25,8 +25,14 @@ function parseClientOrigins() {
 
 function resolveFirebaseServiceAccount() {
   const inline = process.env.FIREBASE_SERVICE_ACCOUNT_JSON
-  if (inline) {
-    return inline
+  if (inline && inline.trim().length > 0) {
+    // Validate JSON format
+    try {
+      JSON.parse(inline)
+      return inline
+    } catch (error: any) {
+      throw new Error(`Invalid JSON in FIREBASE_SERVICE_ACCOUNT_JSON: ${error.message}`)
+    }
   }
 
   const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS

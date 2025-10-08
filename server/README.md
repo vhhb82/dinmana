@@ -15,12 +15,16 @@ CLIENT_ORIGIN=https://dinmana.vercel.app,https://www.din-mm.site,http://localhos
 CF_ACCOUNT_ID=6c4685145803de4e2a161d569526ee20
 CF_IMAGES_TOKEN=UOxvY6BszSWFfE7DHzNaTbveOPEj1zdaM6rMZuHz
 CF_IMAGES_URL=https://imagedelivery.net/XUmtXWy7NhUY02gsO5fPbg/<image_id>/<variant_name>
-GOOGLE_APPLICATION_CREDENTIALS=./creds/firebase-admin.json
+FIREBASE_SERVICE_ACCOUNT_JSON={"type":"service_account","project_id":"dinmana",...}
 ```
 
-### 2. Fișiere necesare
+### 2. Configurare Firebase
 
-Asigură-te că fișierul `creds/firebase-admin.json` este prezent în repository.
+**Pentru deployment (Recomandat):**
+- Folosește variabila de mediu `FIREBASE_SERVICE_ACCOUNT_JSON` cu conținutul JSON al fișierului de credentials
+
+**Pentru dezvoltare locală:**
+- Poți folosi fișierul `creds/firebase-admin.json` prin variabila `GOOGLE_APPLICATION_CREDENTIALS`
 
 ### 3. Comenzi de deployment
 
