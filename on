@@ -1,0 +1,112 @@
+warning: in the working copy of 'lib/api.ts', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/lib/api.ts b/lib/api.ts[m
+[1mindex 1c549e2..4848055 100644[m
+[1m--- a/lib/api.ts[m
+[1m+++ b/lib/api.ts[m
+[36m@@ -1,4 +1,4 @@[m
+[31m-import { auth } from '@/lib/firebase'[m
+[32m+[m[32m﻿import { auth } from '@/lib/firebase'[m
+ [m
+ const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8080'[m
+ [m
+[36m@@ -13,6 +13,28 @@[m [mexport class ApiError extends Error {[m
+   }[m
+ }[m
+ [m
+[32m+[m[32masync function buildApiError(response: Response): Promise<ApiError> {[m
+[32m+[m[32m  const contentType = response.headers.get('content-type') ?? ''[m
+[32m+[m[32m  let details: unknown[m
+[32m+[m[32m  let message = `Cererea a esuat cu status ${response.status}`[m
+[32m+[m
+[32m+[m[32m  if (contentType.includes('application/json')) {[m
+[32m+[m[32m    details = await response.json().catch(() => undefined)[m
+[32m+[m[32m    const jsonMessage = (details as any)?.error ?? (details as any)?.message[m
+[32m+[m[32m    if (typeof jsonMessage === 'string' && jsonMessage.trim().length > 0) {[m
+[32m+[m[32m      message = jsonMessage[m
+[32m+[m[32m    }[m
+[32m+[m[32m  } else {[m
+[32m+[m[32m    const text = await response.text().catch(() => '')[m
+[32m+[m[32m    if (text) {[m
+[32m+[m[32m      details = text[m
+[32m+[m[32m      message = text[m
+[32m+[m[32m    }[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  return new ApiError(message, response.status, details)[m
+[32m+[m[32m}[m
+[32m+[m
+ async function getIdTokenOrThrow() {[m
+   const current = auth.currentUser[m
+   if (!current) {[m
+[36m@@ -22,32 +44,14 @@[m [masync function getIdTokenOrThrow() {[m
+   return current.getIdToken()[m
+ }[m
+ [m
+[31m-async function authFetch(path: string, init: RequestInit = {}) {[m
+[31m-  const token = await getIdTokenOrThrow()[m
+[32m+[m[32masync function authFetch(path: string, init: RequestInit = {}, tokenOverride?: string) {[m
+[32m+[m[32m  const token = tokenOverride ?? (await getIdTokenOrThrow())[m
+   const headers = new Headers(init.headers ?? {})[m
+   headers.set('Authorization', `Bearer ${token}`)[m
+ [m
+   const response = await fetch(`${API_BASE}${path}`, { ...init, headers })[m
+   if (!response.ok) {[m
+[31m-    const contentType = response.headers.get('content-type') ?? ''[m
+[31m-    let details: unknown[m
+[31m-    let message = `Cererea a esuat cu status ${response.status}`[m
+[31m-[m
+[31m-    if (contentType.includes('application/json')) {[m
+[31m-      details = await response.json().catch(() => undefined)[m
+[31m-      const jsonMessage = (details as any)?.error ?? (details as any)?.message[m
+[31m-      if (typeof jsonMessage === 'string' && jsonMessage.trim().length > 0) {[m
+[31m-        message = jsonMessage[m
+[31m-      }[m
+[31m-    } else {[m
+[31m-      const text = await response.text().catch(() => '')[m
+[31m-      if (text) {[m
+[31m-        details = text[m
+[31m-        message = text[m
+[31m-      }[m
+[31m-    }[m
+[31m-[m
+[31m-    throw new ApiError(message, response.status, details)[m
+[32m+[m[32m    throw await buildApiError(response)[m
+   }[m
+ [m
+   return response[m
+[36m@@ -71,7 +75,34 @@[m [mexport type CloudflareUploadResult = {[m
+ }[m
+ [m
+ export async function requestDirectUpload(): Promise<DirectUploadResponse> {[m
+[31m-  const response = await authFetch('/api/upload/direct-url', { method: 'POST' })[m
+[32m+[m[32m  const token = await getIdTokenOrThrow()[m
+[32m+[m
+[32m+[m[32m  if (typeof window !== 'undefined') {[m
+[32m+[m[32m    const headers = new Headers({ Authorization: `Bearer ${token}` })[m
+[32m+[m[32m    let sameOriginResponse: Response | null = null[m
+[32m+[m
+[32m+[m[32m    try {[m
+[32m+[m[32m      sameOriginResponse = await fetch('/api/upload/direct-url', {[m
+[32m+[m[32m        method: 'POST',[m
+[32m+[m[32m        headers,[m
+[32m+[m[32m        cache: 'no-store',[m
+[32m+[m[32m      })[m
+[32m+[m[32m    } catch {[m
+[32m+[m[32m      sameOriginResponse = null[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    if (sameOriginResponse) {[m
+[32m+[m[32m      if (sameOriginResponse.ok) {[m
+[32m+[m[32m        return sameOriginResponse.json()[m
+[32m+[m[32m      }[m
+[32m+[m
+[32m+[m[32m      if (sameOriginResponse.status !== 404 && sameOriginResponse.status !== 405) {[m
+[32m+[m[32m        throw await buildApiError(sameOriginResponse)[m
+[32m+[m[32m      }[m
+[32m+[m[32m    }[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  const response = await authFetch('/api/upload/direct-url', { method: 'POST' }, token)[m
+   return response.json()[m
+ }[m
+ [m

@@ -1,6 +1,6 @@
-import { auth } from '@/lib/firebase'
+﻿import { auth } from '@/lib/firebase'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8080'
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'https://opportunity-cache-collections-outcomes.trycloudflare.com'
 
 export class ApiError extends Error {
   status: number
@@ -13,6 +13,28 @@ export class ApiError extends Error {
   }
 }
 
+async function buildApiError(response: Response): Promise<ApiError> {
+  const contentType = response.headers.get('content-type') ?? ''
+  let details: unknown
+  let message = `Cererea a esuat cu status ${response.status}`
+
+  if (contentType.includes('application/json')) {
+    details = await response.json().catch(() => undefined)
+    const jsonMessage = (details as any)?.error ?? (details as any)?.message
+    if (typeof jsonMessage === 'string' && jsonMessage.trim().length > 0) {
+      message = jsonMessage
+    }
+  } else {
+    const text = await response.text().catch(() => '')
+    if (text) {
+      details = text
+      message = text
+    }
+  }
+
+  return new ApiError(message, response.status, details)
+}
+
 async function getIdTokenOrThrow() {
   const current = auth.currentUser
   if (!current) {
@@ -22,32 +44,14 @@ async function getIdTokenOrThrow() {
   return current.getIdToken()
 }
 
-async function authFetch(path: string, init: RequestInit = {}) {
-  const token = await getIdTokenOrThrow()
+async function authFetch(path: string, init: RequestInit = {}, tokenOverride?: string) {
+  const token = tokenOverride ?? (await getIdTokenOrThrow())
   const headers = new Headers(init.headers ?? {})
   headers.set('Authorization', `Bearer ${token}`)
 
   const response = await fetch(`${API_BASE}${path}`, { ...init, headers })
   if (!response.ok) {
-    const contentType = response.headers.get('content-type') ?? ''
-    let details: unknown
-    let message = `Cererea a esuat cu status ${response.status}`
-
-    if (contentType.includes('application/json')) {
-      details = await response.json().catch(() => undefined)
-      const jsonMessage = (details as any)?.error ?? (details as any)?.message
-      if (typeof jsonMessage === 'string' && jsonMessage.trim().length > 0) {
-        message = jsonMessage
-      }
-    } else {
-      const text = await response.text().catch(() => '')
-      if (text) {
-        details = text
-        message = text
-      }
-    }
-
-    throw new ApiError(message, response.status, details)
+    throw await buildApiError(response)
   }
 
   return response
@@ -71,7 +75,34 @@ export type CloudflareUploadResult = {
 }
 
 export async function requestDirectUpload(): Promise<DirectUploadResponse> {
-  const response = await authFetch('/api/upload/direct-url', { method: 'POST' })
+  const token = await getIdTokenOrThrow()
+
+  if (typeof window !== 'undefined') {
+    const headers = new Headers({ Authorization: `Bearer ${token}` })
+    let sameOriginResponse: Response | null = null
+
+    try {
+      sameOriginResponse = await fetch('/api/upload/direct-url', {
+        method: 'POST',
+        headers,
+        cache: 'no-store',
+      })
+    } catch {
+      sameOriginResponse = null
+    }
+
+    if (sameOriginResponse) {
+      if (sameOriginResponse.ok) {
+        return sameOriginResponse.json()
+      }
+
+      if (sameOriginResponse.status !== 404 && sameOriginResponse.status !== 405) {
+        throw await buildApiError(sameOriginResponse)
+      }
+    }
+  }
+
+  const response = await authFetch('/api/upload/direct-url', { method: 'POST' }, token)
   return response.json()
 }
 
