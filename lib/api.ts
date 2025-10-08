@@ -77,31 +77,6 @@ export type CloudflareUploadResult = {
 export async function requestDirectUpload(): Promise<DirectUploadResponse> {
   const token = await getIdTokenOrThrow()
 
-  if (typeof window !== 'undefined') {
-    const headers = new Headers({ Authorization: `Bearer ${token}` })
-    let sameOriginResponse: Response | null = null
-
-    try {
-      sameOriginResponse = await fetch('/api/upload/direct-url', {
-        method: 'POST',
-        headers,
-        cache: 'no-store',
-      })
-    } catch {
-      sameOriginResponse = null
-    }
-
-    if (sameOriginResponse) {
-      if (sameOriginResponse.ok) {
-        return sameOriginResponse.json()
-      }
-
-      if (sameOriginResponse.status !== 404 && sameOriginResponse.status !== 405) {
-        throw await buildApiError(sameOriginResponse)
-      }
-    }
-  }
-
   const response = await authFetch('/api/upload/direct-url', { method: 'POST' }, token)
   return response.json()
 }
