@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FilterBar, type FilterState } from '@/components/FilterBar'
 import { AdCard } from '@/components/AdCard'
@@ -74,7 +74,7 @@ function areFiltersEqual(a: FilterState, b: FilterState) {
   )
 }
 
-export default function AdsPage() {
+function AdsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [filters, setFilters] = useState<FilterState>(() => parseFiltersFromSearch(searchParams))
@@ -146,5 +146,13 @@ export default function AdsPage() {
         </>
       )}
     </main>
+  )
+}
+
+export default function AdsPage() {
+  return (
+    <Suspense fallback={<div className="mt-8 text-center text-neutral-500">Se incarca pagina...</div>}>
+      <AdsPageContent />
+    </Suspense>
   )
 }
