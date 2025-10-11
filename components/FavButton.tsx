@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
@@ -45,10 +45,12 @@ export default function FavButton({ adId }: FavButtonProps) {
     <button
       type="button"
       onClick={toggle}
-      className={`btn btn-outline text-sm ${active ? 'bg-neutral-900 text-white border-neutral-900 hover:bg-neutral-900 hover:text-white' : ''}`}
+      className={`btn btn-outline text-sm ${
+        active ? 'bg-neutral-900 text-white border-neutral-900 hover:bg-neutral-900 hover:text-white' : ''
+      }`}
       aria-pressed={active}
     >
-      {active ? '★ În favorite' : '☆ Favorite' }
+      {active ? 'In favorite' : 'Adauga la favorite'}
     </button>
   )
 }

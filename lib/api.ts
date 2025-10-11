@@ -57,6 +57,15 @@ async function authFetch(path: string, init: RequestInit = {}, tokenOverride?: s
   return response
 }
 
+async function publicFetch(path: string, init: RequestInit = {}) {
+  const response = await fetch(`${API_BASE}${path}`, init)
+  if (!response.ok) {
+    throw await buildApiError(response)
+  }
+
+  return response
+}
+
 type DirectUploadResponse = {
   uploadURL: string
   id: string
@@ -72,6 +81,31 @@ export type CloudflareUploadResult = {
   id: string
   publicUrl: string
   variants: string[]
+}
+
+export type AdRecord = {
+  _id?: string
+  id?: string
+  title: string
+  price: number
+  city: string
+  category: string
+  description?: string
+  image: string
+  images?: string[]
+  ownerId?: string
+  postedAt?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+export type ListAdsFilters = {
+  q?: string
+  city?: string
+  category?: string
+  min?: number
+  max?: number
+  sort?: 'price_asc' | 'price_desc' | 'recent'
 }
 
 export async function requestDirectUpload(): Promise<DirectUploadResponse> {
@@ -120,5 +154,25 @@ export async function createAd(payload: CreateAdPayload) {
     body: JSON.stringify(payload),
   })
 
+  return response.json()
+}
+
+export async function fetchAds(filters: ListAdsFilters = {}, options: { signal?: AbortSignal } = {}): Promise<AdRecord[]> {
+  const params = new URLSearchParams()
+  if (filters.q) params.set('q', filters.q)
+  if (filters.city) params.set('city', filters.city)
+  if (filters.category) params.set('category', filters.category)
+  if (typeof filters.min === 'number') params.set('min', String(filters.min))
+  if (typeof filters.max === 'number') params.set('max', String(filters.max))
+  if (filters.sort === 'price_asc') params.set('sort', 'price_asc')
+  if (filters.sort === 'price_desc') params.set('sort', 'price_desc')
+
+  const query = params.toString()
+  const response = await publicFetch(`/api/ads${query ? `?${query}` : ''}`, { signal: options.signal })
+  return response.json()
+}
+
+export async function fetchAd(id: string, options: { signal?: AbortSignal } = {}): Promise<AdRecord> {
+  const response = await publicFetch(`/api/ads/${id}`, { signal: options.signal })
   return response.json()
 }

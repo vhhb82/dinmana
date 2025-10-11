@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useId } from 'react'
 
@@ -11,12 +11,20 @@ export type FilterState = {
   sort: 'recente' | 'pret_cresc' | 'pret_desc'
 }
 
-const CATEGORIES = ['Toate', 'Auto', 'Imobiliare', 'Electronice', 'Casă & grădină', 'Joburi & servicii', 'Agricultură']
+export const FILTER_CATEGORIES = [
+  'Toate',
+  'Auto',
+  'Imobiliare',
+  'Electronice',
+  'Casa & gradina',
+  'Joburi & servicii',
+  'Agricultura',
+] as const
 
 const SORT_OPTIONS: Array<{ value: FilterState['sort']; label: string }> = [
   { value: 'recente', label: 'Recente' },
-  { value: 'pret_cresc', label: 'Preț ↑' },
-  { value: 'pret_desc', label: 'Preț ↓' },
+  { value: 'pret_cresc', label: 'Pret crescator' },
+  { value: 'pret_desc', label: 'Pret descrescator' },
 ]
 
 export function FilterBar({ value, onChange }: { value: FilterState; onChange: (next: FilterState) => void }) {
@@ -24,21 +32,27 @@ export function FilterBar({ value, onChange }: { value: FilterState; onChange: (
   const update = (patch: Partial<FilterState>) => onChange({ ...value, ...patch })
 
   return (
-    <form className="grid gap-3 md:grid-cols-6" aria-labelledby={`${formId}-title`}>
-      <span id={`${formId}-title`} className="sr-only">Filtre anunțuri</span>
+    <form
+      className="grid gap-3 md:grid-cols-6"
+      aria-labelledby={`${formId}-title`}
+      onSubmit={(event) => event.preventDefault()}
+    >
+      <span id={`${formId}-title`} className="sr-only">
+        Filtre anunturi
+      </span>
       <input
         className="input md:col-span-2"
-        placeholder="Caută..."
+        placeholder="Cauta..."
         value={value.q}
         onChange={(event) => update({ q: event.target.value })}
-        aria-label="Caută anunț"
+        aria-label="Cauta anunt"
       />
       <input
         className="input"
-        placeholder="Oraș"
+        placeholder="Oras"
         value={value.city}
         onChange={(event) => update({ city: event.target.value })}
-        aria-label="Oraș"
+        aria-label="Oras"
       />
       <select
         className="input"
@@ -46,9 +60,9 @@ export function FilterBar({ value, onChange }: { value: FilterState; onChange: (
         onChange={(event) => update({ category: event.target.value })}
         aria-label="Categorie"
       >
-        {CATEGORIES.map((category) => (
+        {FILTER_CATEGORIES.map((category) => (
           <option key={category} value={category}>
-            {category}
+            {category === 'Toate' ? 'Toate categoriile' : category}
           </option>
         ))}
       </select>
@@ -58,14 +72,16 @@ export function FilterBar({ value, onChange }: { value: FilterState; onChange: (
           placeholder="Min"
           value={value.priceMin}
           onChange={(event) => update({ priceMin: event.target.value })}
-          aria-label="Preț minim"
+          aria-label="Pret minim"
+          inputMode="numeric"
         />
         <input
           className="input"
           placeholder="Max"
           value={value.priceMax}
           onChange={(event) => update({ priceMax: event.target.value })}
-          aria-label="Preț maxim"
+          aria-label="Pret maxim"
+          inputMode="numeric"
         />
       </div>
       <select
